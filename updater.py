@@ -2,8 +2,8 @@ import os
 import json
 import re
 import googleapiclient.discovery
-import google.auth.transport.requests
 from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 
 VIDEO_ID = "mIBuiYg-cWA"
 TITLE_TEMPLATE = '"{comment}" ← last comment = video title'
@@ -11,9 +11,22 @@ BANNED_WORDS = ["fuck", "shit", "ass", "bitch", "nigga", "nigger", "cunt", "dick
 
 def get_credentials():
     token_data = os.environ.get("TOKEN_JSON")
-    creds = Credentials.from_authorized_user_info(json.loads(token_data))
+    info = json.loads(token_data)
+    
+    creds = Credentials(
+        token=info.get("token"),
+        refresh_token=info.get("refresh_token"),
+        token_uri=info.get("token_uri", "https://oauth2.googleapis.com/token"),
+        client_id=info.get("client_id"),
+        client_secret=info.get("client_secret"),
+        scopes=["https://www.googleapis.com/auth/youtube",
+                "https://www.googleapis.com/auth/youtube.force-ssl",
+                "https://www.googleapis.com/auth/youtube.readonly"]
+    )
+    
     if creds.expired and creds.refresh_token:
-        creds.refresh(google.auth.transport.requests.Request())
+        creds.refresh(Request())
+    
     return creds
 
 def clean_comment(text):
@@ -27,6 +40,7 @@ def main():
     creds = get_credentials()
     youtube = googleapiclient.discovery.build("youtube", "v3", credentials=creds)
 
+    # Get latest comment
     response = youtube.commentThreads().list(
         part="snippet",
         videoId=VIDEO_ID,
@@ -42,6 +56,7 @@ def main():
     comment = clean_comment(raw)
     new_title = TITLE_TEMPLATE.format(comment=comment)
 
+    # Update title
     youtube.videos().update(
         part="snippet",
         body={
