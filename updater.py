@@ -5,7 +5,7 @@ import googleapiclient.discovery
 import google.auth.transport.requests
 from google.oauth2.credentials import Credentials
 
-VIDEO_ID = "YOUR_VIDEO_ID_HERE"
+VIDEO_ID = "mIBuiYg-cWA"
 TITLE_TEMPLATE = '"{comment}" ← last comment = video title'
 BANNED_WORDS = ["fuck", "shit", "ass", "bitch", "nigga", "nigger", "cunt", "dick", "pussy"]
 
