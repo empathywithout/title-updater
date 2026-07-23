@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import html
 import googleapiclient.discovery
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
@@ -30,10 +31,12 @@ def get_credentials():
     return creds
 
 def clean_comment(text):
+    text = html.unescape(text)
     text = re.sub(r'<[^>]+>', '', text)
     text = text.strip().replace('\n', ' ')
     for word in BANNED_WORDS:
-        text = re.sub(word, "***", text, flags=re.IGNORECASE)
+        text = html.unescape(text)
+    text = re.sub(word, "***", text, flags=re.IGNORECASE)
     return text[:80]
 
 def main():
